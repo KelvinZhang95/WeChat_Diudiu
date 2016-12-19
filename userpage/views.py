@@ -55,43 +55,96 @@ class UserBind(APIView):
         user.student_id = self.input['student_id']
         user.save()
 
+class LostList(APIView):
 
-class ActivityDetail(APIView):
+    def get(self):
+        self.check_input('kind')
+        items = Others.get_by_kind(self.input['kind'])
+        res = []
+        for item in items:
+            if item.status == 0:
+                founder = User.get_by_openid(item.open_id_found)
+                res.append(
+                    {
+                        'id': item.id,
+                        'createTime': int(time.mktime(time.strptime(str(item.create_time)[0:-6], "%Y-%m-%d %H:%M:%S"))),
+                        'picUrl': item.pic_url,
+                        'founderRank': founder.rank,
+                    }
+                )
+        res = sorted(res, key=lambda x: x['createTime'], reverse=True)
+        return res
+
+class LostDetail(APIView):
 
     def get(self):
         self.check_input('id')
-        activity = Activity.get_by_id(self.input['id'])
+        item = Others.get_by_id(self.input['id'])
+        founder = User.get_by_openid(item.open_id_found)
         res = {
-            'id' : activity.id,
-            'name' : activity.name,
-            'startTime' : int(time.mktime(time.strptime(str(activity.start_time)[0:-6], "%Y-%m-%d %H:%M:%S"))),
-            'endTime' : int(time.mktime(time.strptime(str(activity.end_time)[0:-6], "%Y-%m-%d %H:%M:%S"))),
-            'bookStart': int(time.mktime(time.strptime(str(activity.book_start)[0:-6], "%Y-%m-%d %H:%M:%S"))),
-            'bookEnd': int(time.mktime(time.strptime(str(activity.book_end)[0:-6], "%Y-%m-%d %H:%M:%S"))),
-            'place' : activity.place,
-            'description' : activity.description,
-            'key' : activity.key,
-            'totalTickets' : activity.total_tickets,
-            'picUrl' : activity.pic_url,
-            'remainTickets' : activity.remain_tickets,
-            'currentTime' : int(time.mktime(time.strptime(str(datetime.datetime.now())[0:-7], "%Y-%m-%d %H:%M:%S")))
+            'id': item.id,
+            'createTime': int(time.mktime(time.strptime(str(item.create_time)[0:-6], "%Y-%m-%d %H:%M:%S"))),
+            'picUrl': item.pic_url,
+            'description': item.description,
+            'contactWay': item.contact_way,
+            'founderRank': founder.rank,
         }
         return res
 
-class TicketDetail(APIView):
-
-    def get(self):
-        self.check_input('openid', 'ticket')
-        ticket = Ticket.get_by_unique_id(self.input['ticket'])
-        activity = Activity.get_by_id(ticket.activity_id)
-        res = {
-            'activityName': activity.name,
-            'place': activity.place,
-            'activityKey': activity.key,
-            'uniqueId': ticket.unique_id,
-            'startTime': int(time.mktime(time.strptime(str(activity.start_time)[0:-6], "%Y-%m-%d %H:%M:%S"))),
-            'endTime': int(time.mktime(time.strptime(str(activity.end_time)[0:-6], "%Y-%m-%d %H:%M:%S"))),
-            'currentTime': int(time.mktime(time.strptime(str(datetime.datetime.now())[0:-7], "%Y-%m-%d %H:%M:%S"))),
-            'status': ticket.status
-        }
-        return res
+    def post(self):
+        self.check_input('openid_lost', 'id')
+        item = Others.get_by_id(self.input['id'])
+        #if item.status == 1:
+        #   raise ValidateError('item status error')
+        User.update_left_claim_num(self.input['openid_lost'])
+        user = User.get_by_openid(self.input['openid_lost'])
+        if(user.left_claim_num > 0):
+            user.left_claim_num = user.left_claim_num - 1
+            user.last_claim_time = datetime.date.today()
+            item.open_id_lost = self.input['openid_lost']
+            item.end_time = datetime.datetime.now()
+            item.status = 1
+            item.save()
+            user.save()
+        else:
+            raise ValidateError('no more left claim num')
+#
+# class ActivityDetail(APIView):
+#
+#     def get(self):
+#         self.check_input('id')
+#         activity = Activity.get_by_id(self.input['id'])
+#         res = {
+#             'id' : activity.id,
+#             'name' : activity.name,
+#             'startTime' : int(time.mktime(time.strptime(str(activity.start_time)[0:-6], "%Y-%m-%d %H:%M:%S"))),
+#             'endTime' : int(time.mktime(time.strptime(str(activity.end_time)[0:-6], "%Y-%m-%d %H:%M:%S"))),
+#             'bookStart': int(time.mktime(time.strptime(str(activity.book_start)[0:-6], "%Y-%m-%d %H:%M:%S"))),
+#             'bookEnd': int(time.mktime(time.strptime(str(activity.book_end)[0:-6], "%Y-%m-%d %H:%M:%S"))),
+#             'place' : activity.place,
+#             'description' : activity.description,
+#             'key' : activity.key,
+#             'totalTickets' : activity.total_tickets,
+#             'picUrl' : activity.pic_url,
+#             'remainTickets' : activity.remain_tickets,
+#             'currentTime' : int(time.mktime(time.strptime(str(datetime.datetime.now())[0:-7], "%Y-%m-%d %H:%M:%S")))
+#         }
+#         return res
+#
+# class TicketDetail(APIView):
+#
+#     def get(self):
+#         self.check_input('openid', 'ticket')
+#         ticket = Ticket.get_by_unique_id(self.input['ticket'])
+#         activity = Activity.get_by_id(ticket.activity_id)
+#         res = {
+#             'activityName': activity.name,
+#             'place': activity.place,
+#             'activityKey': activity.key,
+#             'uniqueId': ticket.unique_id,
+#             'startTime': int(time.mktime(time.strptime(str(activity.start_time)[0:-6], "%Y-%m-%d %H:%M:%S"))),
+#             'endTime': int(time.mktime(time.strptime(str(activity.end_time)[0:-6], "%Y-%m-%d %H:%M:%S"))),
+#             'currentTime': int(time.mktime(time.strptime(str(datetime.datetime.now())[0:-7], "%Y-%m-%d %H:%M:%S"))),
+#             'status': ticket.status
+#         }
+#         return res

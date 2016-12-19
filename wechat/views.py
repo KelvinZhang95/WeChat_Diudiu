@@ -11,7 +11,7 @@ class CustomWeChatView(WeChatView):
     lib = WeChatLib(WECHAT_TOKEN, WECHAT_APPID, WECHAT_SECRET)
 
     handlers = [
-        LostHandler, FoundHandler, StateHandler, CalculateHandler,
+        LostHandler, FoundHandler, StateHandler, UnbindOrUnsubscribeHandler, BindAccountHandler, CheckRankHandler
     ]
     error_message_handler = ErrorHandler
     default_handler = DefaultHandler
@@ -27,6 +27,10 @@ class CustomWeChatView(WeChatView):
         'lost_class2': 'LOST_CLASS2',
         'lost_class3': 'LOST_CLASS3',
         'lost_class4': 'LOST_CLASS4',
+        'bind_account': 'BIND_ACCOUNT',
+        'check_rank': 'CHECK_RANK',
+        'check_published': 'CHECK_PUBLISHED',
+        'check_claimed': 'CHECK_CLAIMED',
     }
 
     menu = {
@@ -88,6 +92,31 @@ class CustomWeChatView(WeChatView):
                         "type": "click",
                         "name": "其他物品",
                         "key": event_keys['lost_class4'],
+                    }
+                ]
+            },
+            {
+                "name": "其它功能",
+                "sub_button": [
+                    {
+                        "type": "click",
+                        "name": "绑定学号",
+                        "key": event_keys['bind_account'],
+                    },
+                    {
+                        "type": "click",
+                        "name": "查看积分",
+                        "key": event_keys['check_rank'],
+                    },
+                    {
+                        "type": "click",
+                        "name": "已发布物品",
+                        "key": event_keys['check_published'],
+                    },
+                    {
+                        "type": "click",
+                        "name": "已认领物品",
+                        "key": event_keys['check_claimed'],
                     }
                 ]
             }

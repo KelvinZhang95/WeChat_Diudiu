@@ -7,11 +7,25 @@ import time
 class User(models.Model):
     open_id = models.CharField(max_length=64, unique=True, db_index=True)
     student_id = models.CharField(max_length=32, db_index=True)
+    rank = models.IntegerField(default=0)
+    score = models.IntegerField(default=0)
+    left_claim_num = models.IntegerField(default=5)
+    last_claim_time = models.DateField(null=True)
 
     @classmethod
     def get_by_openid(cls, openid):
         try:
             return cls.objects.get(open_id=openid)
+        except cls.DoesNotExist:
+            raise LogicError('User not found')
+
+    @classmethod
+    def update_left_claim_num(cls, openid):
+        try:
+            user = cls.objects.get(open_id=openid)
+            if user.last_claim_time != datetime.date.today():
+                user.left_claim_num = 5 + user.rank
+                user.save()
         except cls.DoesNotExist:
             raise LogicError('User not found')
 
@@ -48,7 +62,7 @@ class IDCard(models.Model):
     kind = models.IntegerField()
     status = models.IntegerField()
     create_time = models.DateTimeField()
-    end_time = models.DateField(null=True)
+    end_time = models.DateTimeField(null=True)
 
     @classmethod
     def create_(cls, res):
@@ -70,12 +84,37 @@ class IDCard(models.Model):
 
 
 class Others(models.Model):
-    open_id = models.CharField(max_length=64, db_index=True)
+    open_id_found = models.CharField(max_length=64, db_index=True)
+    open_id_lost = models.CharField(max_length=64, db_index=True)
     pic_url = models.CharField(max_length=256)
     description = models.CharField(max_length=256)
     contact_way = models.CharField(max_length=256)
     kind = models.IntegerField()
+    status = models.IntegerField()
     create_time = models.DateTimeField()
+    end_time = models.DateTimeField(null=True)
+
+    @classmethod
+    def create_(cls, res):
+        try:
+            obj = cls.objects.create(open_id_found=res['open_id_found'], open_id_lost=res['open_id_lost'], \
+                                     pic_url=res['pic_url'], description=res['description'], contact_way=res['contact_way'], \
+                                     kind=res['kind'], status=0, create_time=datetime.datetime.now())
+            return obj.id
+        except:
+            raise LogicError('create state error!')
+
+    @classmethod
+    def get_by_id(cls, id):
+        try:
+            return cls.objects.get(id=id)
+        except cls.DoesNotExist:
+            # raise LogicError('state dose not exist!')
+            return None
+
+    @classmethod
+    def get_by_kind(cls, kind_):
+        return cls.objects.filter(kind = kind_)
 
 # class Activity(models.Model):
 #     name = models.CharField(max_length=128)

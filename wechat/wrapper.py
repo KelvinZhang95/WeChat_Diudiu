@@ -93,6 +93,9 @@ class WeChatHandler(object):
     def url_bind(self):
         return settings.get_url('u/bind', {'openid': self.user.open_id})
 
+    def url_lost(self):
+        return settings.get_url('u/lost/list', {'openid_lost': self.user.open_id, 'kind': 1 + int(self.input['EventKey'][-1])})
+
     # def preview_activity(self, aid):
     #     return settings.get_url('u/activity', {'id': aid})
 

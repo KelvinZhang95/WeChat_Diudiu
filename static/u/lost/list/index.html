@@ -22,24 +22,15 @@
 <script type="text/template" id="tpl-theme">
 </script>
 <script type="text/template" id="tpl-mainbody">
-    <div id="myalert" style="display: none;">
-    <div class="weui-mask"></div>
-    <div class="weui-dialog">
-        <div class="weui-dialog__hd"><strong class="weui-dialog__title">弹窗标题</strong></div>
-        <div class="weui-dialog__bd">弹窗内容，告知当前页面信息等</div>
-        <div class="weui-dialog__ft">
-            <a href="javascript:;" class="weui-dialog__btn weui-dialog__btn_primary">确定</a>
-        </div>
-    </div>
-    </div>
     <div class="weui-cells weui-cell_access">
         {% for item in items %}
-        <a class="weui-cell" href="" >
+        <a class="weui-cell" href="/u/lost/detail?id={{ item.id }}&openid_lost={{ openid_lost }}" >
             <div class="weui-cell__hd">
                 <img src="{{ item.picUrl }}" alt="icon" style="width:60px;margin-right:5px;display:block">
             </div>
             <div class="weui-cell__bd weui-cell_primary">
                 <p>发布时间:{{ item.createTime|date("Y年m月d日 H:i") }}</p>
+                <p>拾主信用等级：{{ item.founderRank }}</p>
             </div>
             <div class="weui-cell__ft" style="width:50px">
                 点击查看详情
@@ -64,11 +55,12 @@
     $(function () {
         swig.setDefaultTZOffset(new Date().getTimezoneOffset());
         render();
-        api.get('/api/u/lost/query', {openid_lost: urlParam.openid_lost, kind: urlParam.kind}, function (data) {
+        api.get('/api/u/lost/list', {kind: urlParam.kind}, function (data) {
             for(var i = 0; i < data.length; i++){
                 updateDate(data[i], 'createTime');
             }
             locals.items = data;
+            locals.openid_lost = urlParam.openid_lost;
             render();
         }, dftFail);
     });
