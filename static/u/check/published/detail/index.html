@@ -52,8 +52,8 @@
                 <p>认领时间:{{ item.endTime|date("Y年m月d日 H:i") }}{% else %}未被认领{% endif %}</p>
             </div>
             <br>
-            {% if item.status %}<a class="weui-btn weui-btn_primary" style="margin-left: 30px; margin-right: 30px; display:block" onclick="submitRepublish();">重新发布该物品</a>
-            {% else %}<a class="weui-btn weui-btn_primary" style="margin-left: 30px; margin-right: 30px; display:block" onclick="submitDelete();">删除该物品</a>
+            {% if item.status == 1 %}<a class="weui-btn weui-btn_primary" style="margin-left: 30px; margin-right: 30px; display:block" onclick="submitRepublish();">重新发布该物品</a>
+            {% elif item.status == 0 %}<a class="weui-btn weui-btn_primary" style="margin-left: 30px; margin-right: 30px; display:block" onclick="submitDelete();">删除该物品</a>
             {% endif %}
             <br>
 </script>
@@ -69,7 +69,7 @@
         $('header').html(swig.render($('#tpl-header').html(), {locals: locals}));
         $('#theme').html(swig.render($('#tpl-theme').html(), {locals: locals}));
         $('#mainbody').html(swig.render($('#tpl-mainbody').html(), {locals: locals}));
-        $('#jumpPrompt').attr('href', '/u/check/published/list?openid_found=' + locals.openid_found);
+        $('#deletePromptConfirm').attr('href', '/u/check/published/list?openid_found=' + urlParam.openid_found);
     };
     $(function () {
         swig.setDefaultTZOffset(new Date().getTimezoneOffset());
