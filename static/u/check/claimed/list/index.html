@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=0">
+    <link rel="stylesheet" href="http://res.wx.qq.com/open/libs/weui/1.1.0/weui.min.css"/>
+    <title>认领物品列表</title>
+</head>
+<body>
+<div id="wrap">
+    <header></header>
+
+    <div class="theme" id="theme"></div>
+
+    <hr/>
+    <div id="mainbody"></div>
+
+</div>
+<script type="text/template" id="tpl-header">
+    <div class="weui-cells__title">您最近认领的物品</div>
+</script>
+<script type="text/template" id="tpl-theme">
+</script>
+<script type="text/template" id="tpl-mainbody">
+    <div class="weui-cells weui-cell_access">
+        {% for item in items %}
+        <a class="weui-cell" href="/u/check/claimed/detail?id={{ item.id }}&openid_lost={{ openid_lost }}" >
+            <div class="weui-cell__hd">
+                <img src="{{ item.picUrl }}" alt="icon" style="width:60px;margin-right:5px;display:block">
+            </div>
+            <div class="weui-cell__bd weui-cell_primary">
+                <p>认领时间:{{ item.endTime|date("Y年m月d日 H:i") }}</p>
+                <p>状态:{% if item.status == 2 %}已确认{% else %}未确认{% endif %}</p>
+            </div>
+            <div class="weui-cell__ft" style="width:50px">
+                点击查看详情
+            </div>
+        </a>
+        {% endfor %}
+    </div>
+</script>
+
+<script src="/3rd/jquery.js"></script>
+<script src="/3rd/swig.js"></script>
+<script src="/js/weixin_lib.js"></script>
+<script src="/js/base.js"></script>
+
+<script>
+    var locals = {};
+    var render = function () {
+        $('header').html(swig.render($('#tpl-header').html(), {locals: locals}));
+        $('#theme').html(swig.render($('#tpl-theme').html(), {locals: locals}));
+        $('#mainbody').html(swig.render($('#tpl-mainbody').html(), {locals: locals}));
+    };
+    $(function () {
+        swig.setDefaultTZOffset(new Date().getTimezoneOffset());
+        render();
+        api.get('/api/u/check/claimed/list', {'openid_lost': urlParam.openid_lost}, function (data) {
+            for(var i = 0; i < data.length; i++){
+                updateDate(data[i], 'endTime');
+            }
+            locals.items = data;
+            locals.openid_lost = urlParam.openid_lost;
+            render();
+        }, dftFail);
+    });
+</script>
+
+</body>
+</html>

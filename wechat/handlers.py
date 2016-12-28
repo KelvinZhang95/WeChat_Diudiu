@@ -68,6 +68,22 @@ class CheckRankHandler(WeChatHandler):
     def handle(self):
         return self.reply_text('您的信用等级是' + str(self.user.rank) + '级')
 
+class CheckPublishedHandler(WeChatHandler):
+
+    def check(self):
+        return self.is_event_click(self.view.event_keys['check_published'])
+
+    def handle(self):
+        return self.reply_text(self.get_message('check_published'))
+
+class CheckClaimedHandler(WeChatHandler):
+
+    def check(self):
+        return self.is_event_click(self.view.event_keys['check_claimed'])
+
+    def handle(self):
+        return self.reply_text(self.get_message('check_claimed'))
+
 class LostHandler(WeChatHandler):
 
     def check(self):

@@ -29,6 +29,27 @@ class User(models.Model):
         except cls.DoesNotExist:
             raise LogicError('User not found')
 
+    @classmethod
+    def change_score(cls, openid, delta):
+        try:
+            user = cls.objects.get(open_id=openid)
+            if user.student_id:
+                if delta > 0:
+                    user.score = user.score + delta * 2
+                else:
+                    user.score = user.score - delta / 2
+            else:
+                user.score = user.score + delta
+            if user.score >= 100:
+                user.score = 0
+                user.rank = user.rank + 1
+            elif user.score < 0:
+                user.score = 50
+                user.rank = user.rank - 1
+            user.save()
+        except cls.DoesNotExist:
+            raise LogicError('User not found')
+
 class State(models.Model):
     open_id = models.CharField(max_length=64, unique=True, db_index=True)
     kind = models.IntegerField()
@@ -116,7 +137,15 @@ class Others(models.Model):
     def get_by_kind(cls, kind_):
         return cls.objects.filter(kind = kind_)
 
-# class Activity(models.Model):
+    @classmethod
+    def get_by_openid_found(cls, openid_found_):
+        return cls.objects.filter(open_id_found=openid_found_)
+
+    @classmethod
+    def get_by_openid_lost(cls, openid_lost_):
+        return cls.objects.filter(open_id_lost=openid_lost_)
+
+            # class Activity(models.Model):
 #     name = models.CharField(max_length=128)
 #     key = models.CharField(max_length=64, db_index=True)
 #     description = models.TextField()

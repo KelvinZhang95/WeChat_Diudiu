@@ -96,6 +96,12 @@ class WeChatHandler(object):
     def url_lost(self):
         return settings.get_url('u/lost/list', {'openid_lost': self.user.open_id, 'kind': 1 + int(self.input['EventKey'][-1])})
 
+    def url_check_published(self):
+        return settings.get_url('u/check/published/list', {'openid_found': self.user.open_id})
+
+    def url_check_claimed(self):
+        return settings.get_url('u/check/claimed/list', {'openid_lost': self.user.open_id})
+
     # def preview_activity(self, aid):
     #     return settings.get_url('u/activity', {'id': aid})
 

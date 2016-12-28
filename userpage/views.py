@@ -108,6 +108,113 @@ class LostDetail(APIView):
             user.save()
         else:
             raise ValidateError('no more left claim num')
+
+class CheckPublishedList(APIView):
+
+    def get(self):
+        self.check_input('openid_found')
+        items = Others.get_by_openid_found(self.input['openid_found'])
+        res = []
+        for item in items:
+            res.append(
+                {
+                    'id': item.id,
+                    'createTime': int(time.mktime(time.strptime(str(item.create_time)[0:-6], "%Y-%m-%d %H:%M:%S"))),
+                    'picUrl': item.pic_url,
+                    'status': item.status,
+                }
+            )
+        res = sorted(res, key=lambda x: x['createTime'], reverse=True)
+        return res
+
+class CheckPublishedDetail(APIView):
+
+    def get(self):
+        self.check_input('id')
+        item = Others.get_by_id(self.input['id'])
+        if(item.status > 0):
+            res = {
+                'id': item.id,
+                'createTime': int(time.mktime(time.strptime(str(item.create_time)[0:-6], "%Y-%m-%d %H:%M:%S"))),
+                'picUrl': item.pic_url,
+                'description': item.description,
+                'contactWay': item.contact_way,
+                'status': item.status,
+                'endTime': int(time.mktime(time.strptime(str(item.end_time)[0:-6], "%Y-%m-%d %H:%M:%S"))),
+            }
+        else:
+            res = {
+                'id': item.id,
+                'createTime': int(time.mktime(time.strptime(str(item.create_time)[0:-6], "%Y-%m-%d %H:%M:%S"))),
+                'picUrl': item.pic_url,
+                'description': item.description,
+                'contactWay': item.contact_way,
+                'status': item.status,
+            }
+        return res
+
+    def post(self):
+        self.check_input('flag', 'id')
+        item = Others.get_by_id(self.input['id'])
+        if self.input['flag'] == 1:
+            User.change_score(item.open_id_lost, -5)
+            item.status = 0
+            item.save()
+        elif self.input['flag'] == 0:
+            item.delete()
+
+class CheckClaimedList(APIView):
+
+    def get(self):
+        self.check_input('openid_lost')
+        items = Others.get_by_openid_lost(self.input['openid_lost'])
+        res = []
+        for item in items:
+            if item.status > 0:
+                res.append(
+                    {
+                        'id': item.id,
+                        'endTime': int(time.mktime(time.strptime(str(item.end_time)[0:-6], "%Y-%m-%d %H:%M:%S"))),
+                        'picUrl': item.pic_url,
+                        'status': item.status,
+                    }
+                )
+        res = sorted(res, key=lambda x: x['endTime'], reverse=True)
+        return res
+
+class CheckClaimedDetail(APIView):
+
+    def get(self):
+        self.check_input('id')
+        item = Others.get_by_id(self.input['id'])
+        founder = User.get_by_openid(item.open_id_found)
+        res = {
+            'id': item.id,
+            'createTime': int(time.mktime(time.strptime(str(item.create_time)[0:-6], "%Y-%m-%d %H:%M:%S"))),
+            'picUrl': item.pic_url,
+            'description': item.description,
+            'contactWay': item.contact_way,
+            'status': item.status,
+            'endTime': int(time.mktime(time.strptime(str(item.end_time)[0:-6], "%Y-%m-%d %H:%M:%S"))),
+            'founderRank': founder.rank,
+        }
+        return res
+
+    def post(self):
+        self.check_input('flag', 'id')
+        item = Others.get_by_id(self.input['id'])
+        if self.input['flag'] == 0:
+            User.change_score(item.open_id_found, 20)
+            item.status = 2
+            item.save()
+        elif self.input['flag'] == 1:
+            item.status = 0
+            item.save()
+        elif self.input['flag'] == 2:
+            User.change_score(item.open_id_found, -5)
+            item.status = 0
+            item.save()
+
 #
 # class ActivityDetail(APIView):
 #

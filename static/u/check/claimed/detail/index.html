@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=0">
+    <link rel="stylesheet" href="http://res.wx.qq.com/open/libs/weui/1.1.0/weui.min.css"/>
+    <title>认领物品详情</title>
+</head>
+<body>
+<div id="wrap">
+    <header></header>
+
+    <div class="theme" id="theme"></div>
+
+    <hr/>
+    <div id="mainbody"></div>
+
+</div>
+<script type="text/template" id="tpl-header">
+    <div class="weui-cells__title">详细信息</div>
+</script>
+<script type="text/template" id="tpl-theme">
+</script>
+    <div id="confirmPrompt" style="display: none;">
+    <div class="weui-mask"></div>
+    <div class="weui-dialog">
+        <div class="weui-dialog__hd"><strong class="weui-dialog__title">已确认取回，拾主将会获得积分奖励</strong></div>
+        <div class="weui-dialog__ft">
+            <a href="javascript:; " onclick="reload();" class="weui-dialog__btn weui-dialog__btn_primary">确定</a>
+        </div>
+    </div>
+    </div>
+    <div id="backPrompt" style="display: none;">
+    <div class="weui-mask"></div>
+    <div class="weui-dialog">
+        <div class="weui-dialog__hd"><strong class="weui-dialog__title">已成功退回，该物品将会被重新发布</strong></div>
+        <div class="weui-dialog__ft">
+            <a id="backPromptConfirm" href="javascript:;" class="weui-dialog__btn weui-dialog__btn_primary">确定</a>
+        </div>
+    </div>
+    </div>
+    <div id="reportPrompt" style="display: none;">
+    <div class="weui-mask"></div>
+    <div class="weui-dialog">
+        <div class="weui-dialog__hd"><strong class="weui-dialog__title">已成功举报，该物品将会被重新发布，并且拾主会被扣除积分</strong></div>
+        <div class="weui-dialog__ft">
+            <a id="reportPromptConfirm" href="javascript:;" class="weui-dialog__btn weui-dialog__btn_primary">确定</a>
+        </div>
+    </div>
+    </div>
+<script type="text/template" id="tpl-mainbody">
+
+            <div class="weui-cell__hd">
+                <img src="{{ item.picUrl }}" alt="icon" style="width:170px;margin-left: auto; margin-right: auto; display:block">
+            </div>
+            <br>
+            <div style="margin-left: 20px; margin-right: 20px;">
+                <p>发布时间:{{ item.createTime|date("Y年m月d日 H:i") }}</p>
+                <p>物品描述:{{ item.description }}</p>
+                <p>联系方式:{{ item.contactWay }}</p>
+                <p>拾主信用等级:{{ item.founderRank }}</p>
+                <p>认领时间:{{ item.endTime|date("Y年m月d日 H:i") }}</p>
+                <p>状态:{% if item.status == 2 %}已确认{% else %}未确认{% endif %}</p>
+            </div>
+            <br>
+            {% if item.status == 1 %}
+            <a class="weui-btn weui-btn_primary" style="margin-left: 30px; margin-right: 30px; display:block" onclick="submitConfirm();">确认已取回</a>
+            <a class="weui-btn weui-btn_primary" style="margin-left: 30px; margin-right: 30px; display:block" onclick="submitBack();">识错并退回</a>
+            <a class="weui-btn weui-btn_primary" style="margin-left: 30px; margin-right: 30px; display:block" onclick="submitReport();">举报虚假信息</a>
+            {% endif %}
+            <br>
+</script>
+
+<script src="/3rd/jquery.js"></script>
+<script src="/3rd/swig.js"></script>
+<script src="/js/weixin_lib.js"></script>
+<script src="/js/base.js"></script>
+
+<script>
+    var locals = {};
+    var render = function () {
+        $('header').html(swig.render($('#tpl-header').html(), {locals: locals}));
+        $('#theme').html(swig.render($('#tpl-theme').html(), {locals: locals}));
+        $('#mainbody').html(swig.render($('#tpl-mainbody').html(), {locals: locals}));
+        $('#backPromptConfirm').attr('href', '/u/check/claimed/list?openid_lost=' + locals.openid_lost);
+        $('#reportPromptConfirm').attr('href', '/u/check/claimed/list?openid_lost=' + locals.openid_lost);
+    };
+    $(function () {
+        swig.setDefaultTZOffset(new Date().getTimezoneOffset());
+        render();
+        api.get('/api/u/check/claimed/detail', {id: urlParam.id}, function (data) {
+            updateDate(data, 'createTime');
+            updateDate(data, 'endTime');
+            locals.item = data;
+            locals.openid_lost = urlParam.openid_lost;
+            render();
+        }, dftFail);
+    });
+    var submitConfirm = function () {
+        api.post('/api/u/check/claimed/detail', {id:urlParam.id, flag:0}, function () {
+            if($('#confirmPrompt')[0].style.display == 'none'){
+                $('#confirmPrompt')[0].style.display = 'block';
+                //render();
+            }
+        }, function () {
+        });
+    };
+    var submitBack = function () {
+        api.post('/api/u/check/claimed/detail', {id:urlParam.id, flag:1}, function () {
+            if($('#backPrompt')[0].style.display == 'none'){
+                $('#backPrompt')[0].style.display = 'block';
+            }
+        }, function () {
+        });
+    }
+    var submitReport = function () {
+        api.post('/api/u/check/claimed/detail', {id:urlParam.id, flag:2}, function () {
+            if($('#reportPrompt')[0].style.display == 'none'){
+                $('#reportPrompt')[0].style.display = 'block';
+            }
+        }, function () {
+        });
+    }
+    var reload = function () {
+        //render();
+        if($('#confirmPrompt')[0].style.display == 'block') {
+            $('#confirmPrompt')[0].style.display = 'none';
+        }
+        if($('#backPrompt')[0].style.display == 'block') {
+            $('#backPrompt')[0].style.display = 'none';
+        }
+        if($('#reportPrompt')[0].style.display == 'block') {
+            $('#reportPrompt')[0].style.display = 'none';
+        }
+        api.get('/api/u/check/claimed/detail', {id: urlParam.id}, function (data) {
+            updateDate(data, 'createTime');
+            updateDate(data, 'endTime');
+            locals.item = data;
+            locals.openid_lost = urlParam.openid_lost;
+            render();
+        }, dftFail);
+    };
+</script>
+</body>
+</html>

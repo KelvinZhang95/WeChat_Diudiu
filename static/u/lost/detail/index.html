@@ -1,5 +1,4 @@
 <!DOCTYPE html>
-<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=0">
@@ -27,7 +26,7 @@
         <div class="weui-dialog__hd"><strong class="weui-dialog__title">拾主联系方式</strong></div>
         <div class="weui-dialog__bd" id="contactway"></div>
         <div class="weui-dialog__ft">
-            <a href="javascript:; " onclick="hide();" class="weui-dialog__btn weui-dialog__btn_primary">确定</a>
+            <a id="jumpToCheckClaim" href="javascript:;" onclick="jump();" class="weui-dialog__btn weui-dialog__btn_primary">确定</a>
         </div>
     </div>
     </div>
@@ -43,21 +42,18 @@
     </div>
 <script type="text/template" id="tpl-mainbody">
 
-    <div class="weui-cells weui-cell_access">
-        <div class="weui-cell">
             <div class="weui-cell__hd">
-                <img src="{{ item.picUrl }}" alt="icon" style="width:60px;margin-right:5px;display:block">
+                <img src="{{ item.picUrl }}" alt="icon" style="width:170px;margin-left: auto; margin-right: auto; display:block">
             </div>
-            <div class="weui-cell__bd weui-cell_primary">
+            <br>
+            <div style="margin-left: 20px; margin-right: 20px;">
                 <p>发布时间:{{ item.createTime|date("Y年m月d日 H:i") }}</p>
                 <p>物品描述:{{ item.description }}</p>
-                <p>拾主信用等级：{{ item.founderRank }}</p>
+                <p>拾主信用等级:{{ item.founderRank }}</p>
             </div>
-            <div class="weui-cell__ft" style="width:50px" onclick="submitClaim();">
-                认领该物品
-            </div>
-        </div>
-    </div>
+            <br>
+            <a  class="weui-btn weui-btn_primary" style="margin-left: 30px; margin-right: 30px; display:block" onclick="submitClaim();">认领该物品</a>
+            <br>
 </script>
 
 <script src="/3rd/jquery.js"></script>
@@ -86,12 +82,12 @@
             if($('#claimSucceed')[0].style.display == 'none'){
                 $('#claimSucceed')[0].style.display = 'block';
                 $('#contactway')[0].innerHTML = locals.item.contactWay;
-                render();
+                //render();
             }
         }, function () {
             if($('#claimFailed')[0].style.display == 'none'){
                 $('#claimFailed')[0].style.display = 'block';
-                render();
+                // render();
             }
         });
     };
@@ -102,13 +98,14 @@
         if($('#claimFailed')[0].style.display == 'block') {
             $('#claimFailed')[0].style.display = 'none';
         }
-
     };
     var submitValidation = function (openid_lost, id, success, fail) {
         var data = {openid_lost: openid_lost, id:id};
         api.post('/api/u/lost/detail', data, success, fail);
     }
+    var jump = function () {
+        $("#jumpToCheckClaim").attr('href', '/u/check/claimed/detail?id=' + urlParam.id + '&openid_lost=' + urlParam.openid_lost);
+    }
 </script>
-
 </body>
 </html>

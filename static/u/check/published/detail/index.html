@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=0">
+    <link rel="stylesheet" href="http://res.wx.qq.com/open/libs/weui/1.1.0/weui.min.css"/>
+    <title>发布物品详情</title>
+</head>
+<body>
+<div id="wrap">
+    <header></header>
+
+    <div class="theme" id="theme"></div>
+
+    <hr/>
+    <div id="mainbody"></div>
+
+</div>
+<script type="text/template" id="tpl-header">
+    <div class="weui-cells__title">详细信息</div>
+</script>
+<script type="text/template" id="tpl-theme">
+</script>
+    <div id="republishPrompt" style="display: none;">
+    <div class="weui-mask"></div>
+    <div class="weui-dialog">
+        <div class="weui-dialog__hd"><strong class="weui-dialog__title">重新发布成功</strong></div>
+        <div class="weui-dialog__ft">
+            <a href="javascript:; " onclick="reload();" class="weui-dialog__btn weui-dialog__btn_primary">确定</a>
+        </div>
+    </div>
+    </div>
+    <div id="deletePrompt" style="display: none;">
+    <div class="weui-mask"></div>
+    <div class="weui-dialog">
+        <div class="weui-dialog__hd"><strong class="weui-dialog__title">删除成功</strong></div>
+        <div class="weui-dialog__ft">
+            <a id="deletePromptConfirm" href="javascript:;" class="weui-dialog__btn weui-dialog__btn_primary">确定</a>
+        </div>
+    </div>
+    </div>
+<script type="text/template" id="tpl-mainbody">
+
+            <div class="weui-cell__hd">
+                <img src="{{ item.picUrl }}" alt="icon" style="width:170px;margin-left: auto; margin-right: auto; display:block">
+            </div>
+            <br>
+            <div style="margin-left: 20px; margin-right: 20px;">
+                <p>发布时间:{{ item.createTime|date("Y年m月d日 H:i") }}</p>
+                <p>物品描述:{{ item.description }}</p>
+                <p>联系方式:{{ item.contactWay }}</p>
+                <p>状态:{% if item.status %}已被认领</p>
+                <p>认领时间:{{ item.endTime|date("Y年m月d日 H:i") }}{% else %}未被认领{% endif %}</p>
+            </div>
+            <br>
+            {% if item.status %}<a class="weui-btn weui-btn_primary" style="margin-left: 30px; margin-right: 30px; display:block" onclick="submitRepublish();">重新发布该物品</a>
+            {% else %}<a class="weui-btn weui-btn_primary" style="margin-left: 30px; margin-right: 30px; display:block" onclick="submitDelete();">删除该物品</a>
+            {% endif %}
+            <br>
+</script>
+
+<script src="/3rd/jquery.js"></script>
+<script src="/3rd/swig.js"></script>
+<script src="/js/weixin_lib.js"></script>
+<script src="/js/base.js"></script>
+
+<script>
+    var locals = {};
+    var render = function () {
+        $('header').html(swig.render($('#tpl-header').html(), {locals: locals}));
+        $('#theme').html(swig.render($('#tpl-theme').html(), {locals: locals}));
+        $('#mainbody').html(swig.render($('#tpl-mainbody').html(), {locals: locals}));
+        $('#jumpPrompt').attr('href', '/u/check/published/list?openid_found=' + locals.openid_found);
+    };
+    $(function () {
+        swig.setDefaultTZOffset(new Date().getTimezoneOffset());
+        render();
+        api.get('/api/u/check/published/detail', {id: urlParam.id}, function (data) {
+            updateDate(data, 'createTime');
+            if(data['status']) updateDate(data, 'endTime');
+            locals.item = data;
+            locals.openid_found = urlParam.openid_found;
+            render();
+        }, dftFail);
+    });
+    var submitRepublish = function () {
+        api.post('/api/u/check/published/detail', {id:urlParam.id, flag:1}, function () {
+            if($('#republishPrompt')[0].style.display == 'none'){
+                $('#republishPrompt')[0].style.display = 'block';
+                //render();
+            }
+        }, function () {
+        });
+    };
+    var submitDelete = function () {
+        api.post('/api/u/check/published/detail', {id:urlParam.id, flag:0}, function () {
+            if($('#deletePrompt')[0].style.display == 'none'){
+                $('#deletePrompt')[0].style.display = 'block';
+            }
+        }, function () {
+        });
+    }
+    var reload = function () {
+        //render();
+        if($('#republishPrompt')[0].style.display == 'block') {
+            $('#republishPrompt')[0].style.display = 'none';
+        }
+        if($('#deletePrompt')[0].style.display == 'block') {
+            $('#deletePrompt')[0].style.display = 'none';
+        }
+        api.get('/api/u/check/published/detail', {id: urlParam.id}, function (data) {
+            updateDate(data, 'createTime');
+            if(data['status']) updateDate(data, 'endTime');
+            locals.item = data;
+            locals.openid_found = urlParam.openid_found;
+            render();
+        }, dftFail);
+    };
+</script>
+</body>
+</html>
