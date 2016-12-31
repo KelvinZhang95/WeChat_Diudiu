@@ -3,8 +3,6 @@
 
 
 
-__author__ = "Epsirom"
-
 
 class BaseError(Exception):
 

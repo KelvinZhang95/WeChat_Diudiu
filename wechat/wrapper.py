@@ -16,7 +16,6 @@ from codex.baseview import BaseView
 from wechat.models import *
 
 
-__author__ = "Epsirom"
 
 
 
@@ -102,35 +101,6 @@ class WeChatHandler(object):
     def url_check_claimed(self):
         return settings.get_url('u/check/claimed/list', {'openid_lost': self.user.open_id})
 
-    # def preview_activity(self, aid):
-    #     return settings.get_url('u/activity', {'id': aid})
-
-    # def get_message0(self, name):
-    #     if name.endswith('.html'):
-    #         name = name[: -5]
-    #     activities_urls_ = {}
-    #     activities = Activity.objects.all()
-    #     for i in activities:
-    #         if i.status == 1:
-    #             activities_urls_[settings.get_url('u/activity', {'id': i.id})] = i.name
-    #     return get_template('messages/' + name + '.html').render(dict(
-    #         handler=self, user=self.user, activities_urls=activities_urls_
-    #     ))
-    #
-    # def get_message1(self, name):
-    #     if name.endswith('.html'):
-    #         name = name[: -5]
-    #     links = []
-    #     tickets_urls_ = {}
-    #     tickets = Ticket.objects.all()
-    #     for i in tickets:
-    #         if i.student_id == self.user.student_id:
-    #             links.append(i)
-    #     for i in links:
-    #         tickets_urls_[settings.get_url('u/ticket', {'openid': self.user.open_id, 'ticket': i.unique_id})] = i.activity.name + "    的票 "+i.unique_id
-    #     return get_template('messages/' + name + '.html').render(dict(
-    #         handler=self, user=self.user, tickets_urls=tickets_urls_
-    #     ))
 
 class WeChatEmptyHandler(WeChatHandler):
 

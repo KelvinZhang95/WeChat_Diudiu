@@ -8,7 +8,6 @@ import datetime
 from django.db.models import F
 import urllib.request
 
-__author__ = "Epsirom"
 
 
 class ErrorHandler(WeChatHandler):
@@ -28,20 +27,7 @@ class DefaultHandler(WeChatHandler):
     def handle(self):
         return self.reply_text('对不起，没有找到您需要的信息:(')
 
-# class HelpOrSubscribeHandler(WeChatHandler):
-#
-#     def check(self):
-#         return self.is_text('帮助', 'help') or self.is_event('scan', 'subscribe') or \
-#                self.is_event_click(self.view.event_keys['help'])
-#
-#     def handle(self):
-#         return self.reply_single_news({
-#             'Title': self.get_message('help_title'),
-#             'Description': self.get_message('help_description'),
-#             'Url': self.url_help()
-#         })
-#
-#
+
 class UnbindOrUnsubscribeHandler(WeChatHandler):
 
     def check(self):
@@ -266,84 +252,3 @@ class StateHandler(WeChatHandler):
                     return self.reply_text('已经为您登记该物品信息，请暂存该物品，等待失主联系。')
                 else:
                     return self.reply_text('请用文字简要描述，如拾取地点、物品特征')
-
-
-
-
-
-
-#
-# class PreviewActivityHandler(WeChatHandler):
-#
-#     def check(self):
-#         return self.is_text('活动列表') or self.is_event_click(self.view.event_keys['book_what'])
-#
-#     def handle(self):
-#         return self.reply_text(self.get_message0('preview_activity'))
-#         # activities = Activity.objects.all()
-#         # sz = ''
-#         # for i in activities:
-#         #     sz += str(i.id) + " " + i.name + "\n"
-#         # sz += "（回复活动+编号查看详情，例如:活动1）"
-#         # return self.reply_text(sz)
-#
-# # class ActivityDetailHandler(WeChatHandler):
-# #
-# #     aid = 0
-# #     def check(self):
-# #         a = self.input['Content']
-# #         c = Activity.objects.count()
-# #         for i in range(1, c + 1):
-# #             if a == '活动' + str(i):
-# #                 self.aid = i
-# #                 return True
-# #         return False
-# #
-# #     def handle(self):
-# #         if Activity.get_by_id(self.aid).status != 1:
-# #             return self.reply_text("该活动暂未开放")
-# #         return self.reply_text(self.get_message0('preview_activity', str(self.aid)))
-#
-# class PreviewTicketHandler(WeChatHandler):
-#
-#     def check(self):
-#         return self.is_text('查票') or self.is_event_click(self.view.event_keys['get_ticket'])
-#
-#     def handle(self):
-#         return self.reply_text(self.get_message1('preview_ticket'))
-#
-#
-# class BookEmptyHandler(WeChatHandler):
-#
-#     def check(self):
-#         return self.is_event_click(self.view.event_keys['book_empty'])
-#
-#     def handle(self):
-#         return self.reply_text(self.get_message('book_empty'))
-#
-# class BookTicketHandler(WeChatHandler):
-#
-#     def check(self):
-#         return self.is_event_click(self.view.event_keys['book_header'])
-#
-#     def handle(self):
-#         act_id = int(self.input['EventKey'][17:])
-#         act = Activity.get_by_id(act_id)
-#         currentTime = int(time.mktime(time.strptime(str(datetime.datetime.now())[0:-7], "%Y-%m-%d %H:%M:%S")))
-#         if currentTime < int(time.mktime(time.strptime(str(act.book_start)[0:-6], "%Y-%m-%d %H:%M:%S"))):
-#             return self.reply_text('还没开始抢票哦')
-#         elif currentTime > int(time.mktime(time.strptime(str(act.book_end)[0:-6], "%Y-%m-%d %H:%M:%S"))):
-#             return self.reply_text('抢票已经结束了')
-#         else:
-#             if act.remain_tickets <= 0:
-#                 return self.reply_text('票已经抢完了')
-#             else:
-#                 studentId = self.user.student_id
-#                 res = {
-#                     'student_id': studentId,
-#                     'activity': act
-#                 }
-#                 Ticket.create_(res)
-#                 act.remain_tickets = F('remain_tickets') - 1
-#                 act.save()
-#                 return self.reply_text('恭喜你抢到一张票')

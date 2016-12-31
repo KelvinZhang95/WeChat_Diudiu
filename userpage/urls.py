@@ -5,8 +5,6 @@ from django.conf.urls import url
 from userpage.views import *
 
 
-__author__ = "Epsirom"
-
 
 urlpatterns = [
     url(r'^user/bind/?$', UserBind.as_view()),
@@ -16,5 +14,4 @@ urlpatterns = [
     url(r'^check/published/detail?$', CheckPublishedDetail.as_view()),
     url(r'^check/claimed/list?$', CheckClaimedList.as_view()),
     url(r'^check/claimed/detail?$', CheckClaimedDetail.as_view()),
-    # url(r'^check/claimed/?$', CheckClaimedList.as_view()),
 ]

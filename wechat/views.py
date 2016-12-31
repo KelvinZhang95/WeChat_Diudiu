@@ -124,31 +124,6 @@ class CustomWeChatView(WeChatView):
         ]
     }
 
-    # @classmethod
-    # def get_book_btn(cls):
-    #     return cls.menu['button'][-1]
-    #
-    # @classmethod
-    # def update_book_button(cls, activities):
-    #     book_btn = cls.get_book_btn()
-    #     if len(activities) == 0:
-    #         book_btn['type'] = 'click'
-    #         book_btn['key'] = cls.event_keys['book_empty']
-    #     else:
-    #         book_btn.pop('type', None)
-    #         book_btn.pop('key', None)
-    #     book_btn['sub_button'] = list()
-    #     for act in activities:
-    #         book_btn['sub_button'].append({
-    #             'type': 'click',
-    #             'name': act['name'],
-    #             'key': cls.event_keys['book_header'] + str(act['id']),
-    #         })
-    #
     @classmethod
     def update_menu(cls):
-        """
-        :param activities: list of Activity
-        :return: None
-        """
         cls.lib.set_wechat_menu(cls.menu)

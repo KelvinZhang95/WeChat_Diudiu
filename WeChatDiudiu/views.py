@@ -10,7 +10,6 @@ import mimetypes
 import os
 
 
-__author__ = "Epsirom"
 
 
 class StaticFileView(BaseView):

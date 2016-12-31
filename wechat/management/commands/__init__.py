@@ -3,6 +3,4 @@
 
 
 
-__author__ = "Epsirom"
-
 

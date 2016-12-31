@@ -37,33 +37,8 @@ class GetTest(TestCase):
         with self.assertRaises(ValidateError):
             user_bind_view.validate_user()
 
-    @patch('userpage.views.urlopen')
-    def test_validate_user_with_username_password(self, mock_open: MagicMock):
-        user_bind_view = UserBind()
-        user_bind_view.input = {'password': 'x', 'student_id': 1}
-        mock_response = MagicMock()
-        mock_response.read = MagicMock(return_value=b'{"status":"RESTLOGIN_OK"}')
-        mock_open.return_value = MagicMock()
-        mock_open.return_value.__enter__ = MagicMock(return_value=mock_response)
-        user_bind_view.validate_user()
-        self.assertTrue(mock_open.called)
-        mock_open.assert_called_once_with(
-            'https://learn.tsinghua.edu.cn/MultiLanguage/lesson/teacher/loginteacher.jsp',
-            b'userid=1&userpass=x&submit1=%E7%99%BB%E5%BD%95'
-        )
-
-
-
 
 class URLTest(TestCase):
     def test_u_bind(self):
         response = self.client.get('/u/bind')
         self.assertContains(response, '绑定学号')
-
-    def test_u_activity(self):
-        response = self.client.get('/u/activity')
-        self.assertContains(response, '活动详情')
-
-    def test_u_ticket(self):
-        response = self.client.get('/u/ticket')
-        self.assertContains(response, '我的电子票')

@@ -2,7 +2,3 @@
 #
 
 
-
-__author__ = "Epsirom"
-
-

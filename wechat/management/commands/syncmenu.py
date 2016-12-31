@@ -8,7 +8,6 @@ from django.core.management.base import BaseCommand, CommandError
 from wechat.views import CustomWeChatView
 
 
-__author__ = "Epsirom"
 
 
 class Command(BaseCommand):
